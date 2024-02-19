@@ -1,0 +1,65 @@
+import numpy as np
+from scipy.interpolate import CubicSpline
+import matplotlib.pyplot as plt
+
+# Input your own data as lists of foot length and height
+foot_length = np.array([28, 20.5, 24, 22.5, 22.5, 24, 21.5, 19, 27.5, 23.5, 22.6, 23.3, 22, 24, 24.5, 26, 23.5, 24, 21.5, 23, 21.5, 24.7, 23.6, 24.5, 22.5, 22, 23.7, 18, 23.5, 23, 28.5, 25, 25.5, 22.8, 23, 25.8, 38, 27.8, 25, 26, 24.5, 25.5, 23.5, 23.5, 25.5, 36, 23.9, 25, 23.5, 24.6, 22])
+height = np.array([169, 164, 172, 145, 170, 153, 147, 149, 173, 153, 152, 150.5, 149, 158, 159, 167, 154, 176, 149, 151, 148, 160, 153, 166, 157, 155, 153, 125, 149, 162, 170.18, 165, 161.2, 155, 154, 168, 153, 183, 173, 176, 175, 169, 168, 155, 156, 155, 151, 165, 156, 156, 142])
+
+# Remove duplicate values from the foot_length array
+foot_length, unique_indices = np.unique(foot_length, return_index=True)
+height = height[unique_indices]
+
+# Create the cubic spline
+cs = CubicSpline(foot_length, height)
+
+# Generate points on the interpolated curve
+foot_length_new = np.linspace(min(foot_length), max(foot_length), 100)
+height_new = cs(foot_length_new)
+
+# Plot the original data and the interpolated curve
+plt.plot(foot_length, height, 'ro', label='Original Data')
+plt.plot(foot_length_new, height_new, 'b', label='Cubic Spline Interpolation')
+plt.legend()
+plt.xlabel('Foot Length')
+plt.ylabel('Height')
+plt.title('Cubic Spline Interpolation')
+plt.grid(True)
+plt.show()
+
+# Calculate the error for each data point
+error = height_new - np.interp(foot_length_new, foot_length, height)
+
+# Create a table for the error
+table = []
+for i in range(len(foot_length_new)):
+    table.append([foot_length_new[i], height_new[i], error[i]])
+
+# Print the table
+print("Foot Length\tInterpolated Height\tError")
+for row in table:
+    print(f"{row[0]}\t\t{row[1]}\t\t\t{row[2]}")
+
+# Calculate the mean squared error and root mean squared error
+mse = mean_squared_error(height, bspline(foot_length))
+rmse = np.sqrt(mse)
+
+# Calculate the R-squared and adjusted R-squared
+r2 = r2_score(height, bspline(foot_length))
+n = len(height)
+p = 4 # number of parameters in the model
+adj_r2 = 1 - ((1 - r2) * (n - 1) / (n - p - 1))
+
+# Calculate the BIC and AIC
+residuals = height - bspline(foot_length)
+rss = np.sum(residuals ** 2)
+bic = n * np.log(rss / n) + p * np.log(n)
+aic = n * np.log(rss / n) + 2 * p
+
+# Display the results
+print('MSE: {:.2f}'.format(mse))
+print('RMSE: {:.2f}'.format(rmse))
+print('R-squared: {:.2f}'.format(r2))
+print('Adjusted R-squared: {:.2f}'.format(adj_r2))
+print('BIC: {:.2f}'.format(bic))
+print('AIC: {:.2f}'.format(aic))

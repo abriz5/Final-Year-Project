@@ -1,0 +1,52 @@
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
+
+# data
+x = np.array([28, 20.5, 24, 22.5, 22.5, 24, 21.5, 22.9, 27.5, 23.5, 22.6, 23.3, 22, 24, 24.5, 26, 23.5, 24, 21.5, 23, 21.5, 24.7, 23.6, 24.5, 22.5, 22, 23.7, 18, 23.5, 23, 28.5, 25, 25.5, 22.8, 23, 25.8, 38, 27.8, 25, 26, 24.5, 25.5, 23.5, 23.5, 25.5, 36, 23.9, 25, 23.5, 24.6, 22])
+y = np.array([169, 164, 172, 145, 170, 153, 147, 149, 173, 153, 152, 150.5, 149, 158, 159, 167, 154, 176, 149, 151, 148, 160, 153, 166, 157, 155, 153, 125, 149, 162, 170.18, 165, 161.2, 155, 154, 168, 153, 183, 173, 176, 175, 169, 168, 155, 156, 155, 151, 165, 156, 156, 142])
+
+# polynomial least squares with degree 3
+p = np.polyfit(x, y, 3)
+
+# calculate predicted values and residuals
+y_pred = np.polyval(p, x)
+residuals = y - y_pred
+
+# calculate R-squared and adjusted R-squared
+rss = np.sum(residuals**2)
+tss = np.sum((y - np.mean(y))**2)
+r_squared = 1 - (rss / tss)
+n = len(x)
+k = 4
+adj_r_squared = 1 - ((1 - r_squared) * (n - 1) / (n - k - 1))
+
+# plot the data and the fitted line
+plt.scatter(x, y)
+x_curve = np.linspace(np.min(x), np.max(x), 1000)
+y_curve = np.polyval(p, x_curve)
+plt.plot(x_curve, y_curve, color='red')
+
+# add equation to plot
+eq = 'y = {:.2f}x^3 + {:.2f}x^2 + {:.2f}x + {:.2f}'.format(p[0], p[1], p[2], p[3])
+plt.text(17, 1, eq, fontsize=12)
+
+# add axis labels
+plt.xlabel('Foot Length (cm)')
+plt.ylabel('Height (cm)')
+
+# calculate mean squared error and root mean squared error
+mse = np.mean(residuals**2)
+rmse = np.sqrt(mse)
+print("Mean Squared Error:", mse)
+print("Root Mean Squared Error:", rmse)
+
+# calculate AIC and BIC
+aic = n * np.log(mse) + 2 * k
+bic = n * np.log(mse) + k * np.log(n)
+print("AIC:", aic)
+print("BIC:", bic)
+
+# print R-squared and adjusted R-squared
+print("R-squared:", r_squared)
+print("Adjusted R-squared:", adj_r_squared)
